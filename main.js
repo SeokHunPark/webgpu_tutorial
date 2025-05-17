@@ -138,11 +138,29 @@ function showError(message) {
     const errorMessage = document.getElementById('error-message');
     errorMessage.style.display = 'block';
     errorMessage.textContent = message;
+    console.error(message);
+}
+
+// WebGPU 지원 확인
+async function checkWebGPUSupport() {
+    if (!navigator.gpu) {
+        throw new Error('WebGPU를 지원하지 않는 브라우저입니다. Chrome Canary 또는 Firefox Nightly를 사용해주세요.');
+    }
+
+    const adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) {
+        throw new Error('WebGPU 어댑터를 찾을 수 없습니다.');
+    }
+
+    return adapter;
 }
 
 // 메뉴 클릭 이벤트 처리
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        // WebGPU 지원 확인
+        await checkWebGPUSupport();
+
         const menuLinks = document.querySelectorAll('.menu a');
         
         menuLinks.forEach(link => {

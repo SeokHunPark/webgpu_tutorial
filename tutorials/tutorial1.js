@@ -62,35 +62,40 @@ export const tutorial1 = {
 
     // 렌더링 파이프라인 생성
     createPipeline(device, canvasFormat) {
-        return device.createRenderPipeline({
-            layout: 'auto',
-            vertex: {
-                module: device.createShaderModule({
-                    code: this.shaderCode,
-                }),
-                entryPoint: 'vertexMain',
-                buffers: [{
-                    arrayStride: 12, // 3 floats * 4 bytes
-                    attributes: [{
-                        shaderLocation: 0,
-                        offset: 0,
-                        format: 'float32x3',
+        try {
+            return device.createRenderPipeline({
+                layout: 'auto',
+                vertex: {
+                    module: device.createShaderModule({
+                        code: this.shaderCode,
+                    }),
+                    entryPoint: 'vertexMain',
+                    buffers: [{
+                        arrayStride: 12, // 3 floats * 4 bytes
+                        attributes: [{
+                            shaderLocation: 0,
+                            offset: 0,
+                            format: 'float32x3',
+                        }],
                     }],
-                }],
-            },
-            fragment: {
-                module: device.createShaderModule({
-                    code: this.shaderCode,
-                }),
-                entryPoint: 'fragmentMain',
-                targets: [{
-                    format: canvasFormat,
-                }],
-            },
-            primitive: {
-                topology: 'triangle-list',
-            },
-        });
+                },
+                fragment: {
+                    module: device.createShaderModule({
+                        code: this.shaderCode,
+                    }),
+                    entryPoint: 'fragmentMain',
+                    targets: [{
+                        format: canvasFormat,
+                    }],
+                },
+                primitive: {
+                    topology: 'triangle-list',
+                },
+            });
+        } catch (error) {
+            console.error('파이프라인 생성 중 오류 발생:', error);
+            throw error;
+        }
     },
 
     // 메인 렌더링 함수
@@ -127,6 +132,7 @@ export const tutorial1 = {
             console.log('렌더링 완료!');
         } catch (error) {
             console.error('렌더링 중 오류 발생:', error);
+            throw error;
         }
     }
 }; 
