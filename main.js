@@ -1,171 +1,45 @@
 import { tutorial1 } from './tutorials/tutorial1.js';
 
-// 튜토리얼 1: 기본 삼각형
-const tutorial1 = {
-    // WebGPU 초기화
-    async initWebGPU() {
-        try {
-            if (!navigator.gpu) {
-                throw new Error('WebGPU를 지원하지 않는 브라우저입니다.');
-            }
-
-            const adapter = await navigator.gpu.requestAdapter();
-            if (!adapter) {
-                throw new Error('WebGPU 어댑터를 찾을 수 없습니다.');
-            }
-
-            const device = await adapter.requestDevice();
-            const canvas = document.querySelector('canvas');
-            if (!canvas) {
-                throw new Error('Canvas 요소를 찾을 수 없습니다.');
-            }
-
-            const context = canvas.getContext('webgpu');
-            if (!context) {
-                throw new Error('WebGPU 컨텍스트를 생성할 수 없습니다.');
-            }
-
-            const canvasFormat = navigator.gpu.getPreferredCanvasFormat();
-            context.configure({
-                device: device,
-                format: canvasFormat,
-                alphaMode: 'premultiplied',
-            });
-
-            console.log('WebGPU 초기화 성공!');
-            return { device, canvas, context, canvasFormat };
-        } catch (error) {
-            console.error('WebGPU 초기화 중 오류 발생:', error);
-            throw error;
-        }
-    },
-
-    // 삼각형 버텍스 데이터 생성
-    createTriangleVertices() {
-        return new Float32Array([
-            0.0, 0.6, 0.0,  // 상단
-            -0.5, -0.6, 0.0,  // 좌측 하단
-            0.5, -0.6, 0.0,  // 우측 하단
-        ]);
-    },
-
-    // 셰이더 코드
-    shaderCode: `
-        @vertex
-        fn vertexMain(@location(0) position: vec3f) -> @builtin(position) vec4f {
-            return vec4f(position, 1.0);
-        }
-
-        @fragment
-        fn fragmentMain() -> @location(0) vec4f {
-            return vec4f(1.0, 0.0, 0.0, 1.0); // 빨간색
-        }
-    `,
-
-    // 렌더링 파이프라인 생성
-    createPipeline(device, canvasFormat) {
-        return device.createRenderPipeline({
-            layout: 'auto',
-            vertex: {
-                module: device.createShaderModule({
-                    code: this.shaderCode,
-                }),
-                entryPoint: 'vertexMain',
-                buffers: [{
-                    arrayStride: 12, // 3 floats * 4 bytes
-                    attributes: [{
-                        shaderLocation: 0,
-                        offset: 0,
-                        format: 'float32x3',
-                    }],
-                }],
-            },
-            fragment: {
-                module: device.createShaderModule({
-                    code: this.shaderCode,
-                }),
-                entryPoint: 'fragmentMain',
-                targets: [{
-                    format: canvasFormat,
-                }],
-            },
-            primitive: {
-                topology: 'triangle-list',
-            },
-        });
-    },
-
-    // 메인 렌더링 함수
-    async render() {
-        try {
-            const { device, canvas, context, canvasFormat } = await this.initWebGPU();
-            const pipeline = this.createPipeline(device, canvasFormat);
-            
-            // 버텍스 버퍼 생성
-            const vertices = this.createTriangleVertices();
-            const vertexBuffer = device.createBuffer({
-                size: vertices.byteLength,
-                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-            });
-            device.queue.writeBuffer(vertexBuffer, 0, vertices);
-
-            // 렌더링 커맨드 인코더 생성
-            const commandEncoder = device.createCommandEncoder();
-            const renderPass = commandEncoder.beginRenderPass({
-                colorAttachments: [{
-                    view: context.getCurrentTexture().createView(),
-                    clearValue: { r: 0.1, g: 0.2, b: 0.3, a: 1.0 },
-                    loadOp: 'clear',
-                    storeOp: 'store',
-                }],
-            });
-
-            renderPass.setPipeline(pipeline);
-            renderPass.setVertexBuffer(0, vertexBuffer);
-            renderPass.draw(3, 1, 0, 0);
-            renderPass.end();
-
-            device.queue.submit([commandEncoder.finish()]);
-            console.log('렌더링 완료!');
-        } catch (error) {
-            console.error('렌더링 중 오류 발생:', error);
-        }
-    }
-};
-
 // 오류 메시지 표시 함수
 function showError(message) {
     const errorMessage = document.getElementById('error-message');
     errorMessage.style.display = 'block';
     errorMessage.textContent = message;
-    console.error(message);
+    console.error('Error:', message);
 }
 
 // WebGPU 지원 확인
 async function checkWebGPUSupport() {
+    console.log('WebGPU 지원 확인 중...');
     if (!navigator.gpu) {
         throw new Error('WebGPU를 지원하지 않는 브라우저입니다. Chrome Canary 또는 Firefox Nightly를 사용해주세요.');
     }
+    console.log('navigator.gpu 확인됨');
 
     const adapter = await navigator.gpu.requestAdapter();
     if (!adapter) {
         throw new Error('WebGPU 어댑터를 찾을 수 없습니다.');
     }
+    console.log('WebGPU 어댑터 확인됨');
 
     return adapter;
 }
 
 // 메뉴 클릭 이벤트 처리
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM 로드됨, 초기화 시작...');
     try {
         // WebGPU 지원 확인
         await checkWebGPUSupport();
+        console.log('WebGPU 지원 확인 완료');
 
         const menuLinks = document.querySelectorAll('.menu a');
+        console.log('메뉴 링크 찾음:', menuLinks.length);
         
         menuLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
+                console.log('메뉴 클릭:', link.getAttribute('data-tutorial'));
                 
                 // 활성 메뉴 업데이트
                 menuLinks.forEach(l => l.classList.remove('active'));
@@ -176,6 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // 현재는 튜토리얼 1만 구현되어 있음
                 if (tutorialNumber === '1') {
+                    console.log('튜토리얼 1 실행 시작');
                     tutorial1.render().catch(error => {
                         showError(`렌더링 중 오류 발생: ${error.message}`);
                     });
@@ -186,7 +61,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         // 초기 로드 시 튜토리얼 1 실행
+        console.log('초기 튜토리얼 1 실행 시작');
         await tutorial1.render();
+        console.log('초기 튜토리얼 1 실행 완료');
     } catch (error) {
         showError(`초기화 중 오류 발생: ${error.message}`);
     }
