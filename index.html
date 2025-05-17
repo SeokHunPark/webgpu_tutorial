@@ -1,0 +1,74 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>WebGPU 튜토리얼</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                display: flex;
+                font-family: 'Arial', sans-serif;
+            }
+            .menu {
+                width: 250px;
+                background-color: #f5f5f5;
+                padding: 20px;
+                height: 100vh;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            }
+            .content {
+                flex: 1;
+                padding: 20px;
+            }
+            .menu h2 {
+                margin-top: 0;
+                color: #333;
+            }
+            .menu ul {
+                list-style: none;
+                padding: 0;
+            }
+            .menu li {
+                margin: 10px 0;
+            }
+            .menu a {
+                text-decoration: none;
+                color: #666;
+                display: block;
+                padding: 8px 12px;
+                border-radius: 4px;
+                transition: background-color 0.3s;
+            }
+            .menu a:hover {
+                background-color: #e0e0e0;
+            }
+            .menu a.active {
+                background-color: #007bff;
+                color: white;
+            }
+            canvas {
+                border: 1px solid #ccc;
+                margin-top: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="menu">
+            <h2>WebGPU 튜토리얼</h2>
+            <ul>
+                <li><a href="#" class="active" data-tutorial="1">튜토리얼 1: 기본 삼각형</a></li>
+                <li><a href="#" data-tutorial="2">튜토리얼 2: 색상 변경</a></li>
+                <li><a href="#" data-tutorial="3">튜토리얼 3: 애니메이션</a></li>
+            </ul>
+        </div>
+        <div class="content">
+            <h1>튜토리얼 1: 기본 삼각형</h1>
+            <p>WebGPU를 사용하여 기본적인 삼각형을 렌더링하는 예제입니다.</p>
+            <canvas width="800" height="600"></canvas>
+        </div>
+        <script type="module" src="main.js"></script>
+    </body>
+</html>
