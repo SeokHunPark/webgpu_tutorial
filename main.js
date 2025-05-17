@@ -133,30 +133,43 @@ const tutorial1 = {
     }
 };
 
-// 메뉴 클릭 이벤트 처리
-document.addEventListener('DOMContentLoaded', () => {
-    const menuLinks = document.querySelectorAll('.menu a');
-    
-    menuLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            // 활성 메뉴 업데이트
-            menuLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
-            // 튜토리얼 번호 가져오기
-            const tutorialNumber = link.getAttribute('data-tutorial');
-            
-            // 현재는 튜토리얼 1만 구현되어 있음
-            if (tutorialNumber === '1') {
-                tutorial1.render();
-            } else {
-                alert('아직 구현되지 않은 튜토리얼입니다.');
-            }
-        });
-    });
+// 오류 메시지 표시 함수
+function showError(message) {
+    const errorMessage = document.getElementById('error-message');
+    errorMessage.style.display = 'block';
+    errorMessage.textContent = message;
+}
 
-    // 초기 로드 시 튜토리얼 1 실행
-    tutorial1.render();
+// 메뉴 클릭 이벤트 처리
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const menuLinks = document.querySelectorAll('.menu a');
+        
+        menuLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // 활성 메뉴 업데이트
+                menuLinks.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                
+                // 튜토리얼 번호 가져오기
+                const tutorialNumber = link.getAttribute('data-tutorial');
+                
+                // 현재는 튜토리얼 1만 구현되어 있음
+                if (tutorialNumber === '1') {
+                    tutorial1.render().catch(error => {
+                        showError(`렌더링 중 오류 발생: ${error.message}`);
+                    });
+                } else {
+                    showError('아직 구현되지 않은 튜토리얼입니다.');
+                }
+            });
+        });
+
+        // 초기 로드 시 튜토리얼 1 실행
+        await tutorial1.render();
+    } catch (error) {
+        showError(`초기화 중 오류 발생: ${error.message}`);
+    }
 }); 
